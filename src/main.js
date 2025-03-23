@@ -1,149 +1,179 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Water } from 'three/examples/jsm/objects/Water.js';
+import { Sky } from 'three/examples/jsm/objects/Sky.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Scene setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB); // Sky blue background
-
-// Camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 10, 20);
+camera.position.set(0, 10, 30);
 
-// Renderer setup
+// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.5;
 document.body.appendChild(renderer.domElement);
 
-// Controls setup
+// Controls
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
+controls.maxPolarAngle = Math.PI * 0.495;
 controls.minDistance = 10;
-controls.maxDistance = 50;
+controls.maxDistance = 100;
+controls.update();
 
-// Lights setup
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x404040, 1);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(5, 10, 7.5);
+directionalLight.position.set(10, 10, 10);
 directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.width = 1024;
-directionalLight.shadow.mapSize.height = 1024;
 scene.add(directionalLight);
 
-// Create ocean
-const oceanGeometry = new THREE.PlaneGeometry(100, 100, 20, 20);
-const oceanMaterial = new THREE.MeshPhongMaterial({
-    color: 0x0077be,
-    shininess: 60,
-    side: THREE.DoubleSide
-});
-const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
-ocean.rotation.x = -Math.PI / 2;
-ocean.receiveShadow = true;
-scene.add(ocean);
+// Ocean / Water
+const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
 
-// Create ship
-const shipGroup = new THREE.Group();
-
-// Ship hull
-const hullGeometry = new THREE.BoxGeometry(8, 2, 3);
-const hullMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-const hull = new THREE.Mesh(hullGeometry, hullMaterial);
-hull.position.y = 1;
-hull.castShadow = true;
-shipGroup.add(hull);
-
-// Ship deck
-const deckGeometry = new THREE.BoxGeometry(7, 0.5, 2.5);
-const deckMaterial = new THREE.MeshPhongMaterial({ color: 0xD2B48C });
-const deck = new THREE.Mesh(deckGeometry, deckMaterial);
-deck.position.y = 2.25;
-deck.castShadow = true;
-shipGroup.add(deck);
-
-// Ship cabin
-const cabinGeometry = new THREE.BoxGeometry(3, 1.5, 2);
-const cabinMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-const cabin = new THREE.Mesh(cabinGeometry, cabinMaterial);
-cabin.position.y = 3.25;
-cabin.position.x = -1.5;
-cabin.castShadow = true;
-shipGroup.add(cabin);
-
-// Ship mast
-const mastGeometry = new THREE.CylinderGeometry(0.2, 0.2, 6, 8);
-const mastMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-const mast = new THREE.Mesh(mastGeometry, mastMaterial);
-mast.position.y = 5.25;
-mast.position.x = 1;
-mast.castShadow = true;
-shipGroup.add(mast);
-
-// Ship sail
-const sailGeometry = new THREE.PlaneGeometry(3, 4);
-const sailMaterial = new THREE.MeshPhongMaterial({ 
-    color: 0xffffff,
-    side: THREE.DoubleSide
-});
-const sail = new THREE.Mesh(sailGeometry, sailMaterial);
-sail.position.y = 5;
-sail.position.x = 1;
-sail.position.z = 0;
-sail.rotation.y = Math.PI / 2;
-sail.castShadow = true;
-shipGroup.add(sail);
-
-// Position ship
-shipGroup.position.y = 1;
-scene.add(shipGroup);
-
-// Animation state
-let time = 0;
-const shipMovementRadius = 20;
-const shipMovementSpeed = 0.0005;
-const waveSpeed = 0.5;
-const waveHeight = 0.2;
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+const water = new Water(waterGeometry, {
+  textureWidth: 512,
+  textureHeight: 512,
+  waterNormals: new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/waternormals.jpg', function(texture) {
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  }),
+  sunDirection: new THREE.Vector3(),
+  sunColor: 0xffffff,
+  waterColor: 0x001e0f,
+  distortionScale: 3.7,
+  fog: scene.fog !== undefined
 });
 
-// Animation loop
-function animate() {
-    requestAnimationFrame(animate);
-    
-    time += 0.01;
-    
-    // Move ship in a circle
-    shipGroup.position.x = Math.cos(time * shipMovementSpeed) * shipMovementRadius;
-    shipGroup.position.z = Math.sin(time * shipMovementSpeed) * shipMovementRadius;
-    
-    // Rotate ship to face movement direction
-    shipGroup.rotation.y = -time * shipMovementSpeed + Math.PI / 2;
-    
-    // Make ship bob up and down
-    shipGroup.position.y = 1 + Math.sin(time * waveSpeed) * waveHeight;
-    
-    // Animate ocean waves
-    const oceanVertices = oceanGeometry.attributes.position.array;
-    for (let i = 0; i < oceanVertices.length; i += 3) {
-        const x = oceanGeometry.attributes.position.getX(i / 3);
-        const z = oceanGeometry.attributes.position.getZ(i / 3);
-        const distance = Math.sqrt(x * x + z * z);
-        
-        oceanVertices[i + 1] = Math.sin(distance * 0.3 + time * waveSpeed) * waveHeight;
-    }
-    oceanGeometry.attributes.position.needsUpdate = true;
-    
-    controls.update();
-    renderer.render(scene, camera);
+water.rotation.x = -Math.PI / 2;
+scene.add(water);
+
+// Sky
+const sky = new Sky();
+sky.scale.setScalar(10000);
+scene.add(sky);
+
+const skyUniforms = sky.material.uniforms;
+
+skyUniforms['turbidity'].value = 10;
+skyUniforms['rayleigh'].value = 2;
+skyUniforms['mieCoefficient'].value = 0.005;
+skyUniforms['mieDirectionalG'].value = 0.8;
+
+const parameters = {
+  elevation: 2,
+  azimuth: 180
+};
+
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+let renderTarget;
+
+function updateSun() {
+  const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+  const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+  const sunPosition = new THREE.Vector3();
+  sunPosition.setFromSphericalCoords(1, phi, theta);
+
+  sky.material.uniforms['sunPosition'].value.copy(sunPosition);
+  water.material.uniforms['sunDirection'].value.copy(sunPosition).normalize();
+
+  if (renderTarget !== undefined) renderTarget.dispose();
+
+  renderTarget = pmremGenerator.fromScene(sky);
+  scene.environment = renderTarget.texture;
 }
 
-animate(); 
+updateSun();
+
+// Add a ship (placeholder - will be replaced with a detailed model)
+function createSimpleShip() {
+  // Create a group to hold our ship
+  const shipGroup = new THREE.Group();
+  
+  // Ship hull (base)
+  const hullGeometry = new THREE.BoxGeometry(5, 2, 12);
+  const hullMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+  const hull = new THREE.Mesh(hullGeometry, hullMaterial);
+  hull.position.y = 1;
+  shipGroup.add(hull);
+  
+  // Main deck
+  const deckGeometry = new THREE.BoxGeometry(4.5, 0.5, 11);
+  const deckMaterial = new THREE.MeshStandardMaterial({ color: 0xA0522D }); // Sienna
+  const deck = new THREE.Mesh(deckGeometry, deckMaterial);
+  deck.position.y = 2.25;
+  shipGroup.add(deck);
+  
+  // Main mast
+  const mastGeometry = new THREE.CylinderGeometry(0.3, 0.3, 12, 8);
+  const mastMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+  const mast = new THREE.Mesh(mastGeometry, mastMaterial);
+  mast.position.y = 8;
+  mast.position.z = 0;
+  shipGroup.add(mast);
+  
+  // Simple sail
+  const sailGeometry = new THREE.PlaneGeometry(5, 8);
+  const sailMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xf0f0f0,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9
+  });
+  const sail = new THREE.Mesh(sailGeometry, sailMaterial);
+  sail.rotation.y = Math.PI / 2;
+  sail.position.y = 6;
+  sail.position.z = 0;
+  shipGroup.add(sail);
+  
+  // Position the entire ship on the water
+  shipGroup.position.y = 0.25;
+  
+  return shipGroup;
+}
+
+// Add temporary ship to the scene
+const ship = createSimpleShip();
+scene.add(ship);
+
+// ToDo: Replace with detailed model in the future
+// const loader = new GLTFLoader();
+// loader.load('path/to/ship.gltf', function(gltf) {
+//   const model = gltf.scene;
+//   model.position.y = 0;
+//   scene.add(model);
+// });
+
+// Animation loop
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  const time = clock.getElapsedTime();
+  
+  // Animate water
+  water.material.uniforms['time'].value += 1.0 / 60.0;
+  
+  // Animate ship bobbing on the waves
+  ship.position.y = 0.25 + Math.sin(time * 0.5) * 0.2;
+  ship.rotation.x = Math.sin(time * 0.4) * 0.02;
+  ship.rotation.z = Math.sin(time * 0.3) * 0.01;
+  
+  renderer.render(scene, camera);
+}
+
+// Handle window resize
+window.addEventListener('resize', function() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Start animation
+animate();
