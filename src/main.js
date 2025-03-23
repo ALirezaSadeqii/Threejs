@@ -92,48 +92,128 @@ updateSun();
 
 // Add a ship (placeholder - will be replaced with a detailed model)
 function createSimpleShip() {
-  // Create a group to hold our ship
   const shipGroup = new THREE.Group();
-  
+
   // Ship hull (base)
-  const hullGeometry = new THREE.BoxGeometry(5, 2, 12);
+  const hullGeometry = new THREE.BoxGeometry(10, 4, 24);
   const hullMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
   const hull = new THREE.Mesh(hullGeometry, hullMaterial);
-  hull.position.y = 1;
+  hull.position.y = 2;
   shipGroup.add(hull);
-  
+
   // Main deck
-  const deckGeometry = new THREE.BoxGeometry(4.5, 0.5, 11);
+  const deckGeometry = new THREE.BoxGeometry(9.5, 0.5, 23);
   const deckMaterial = new THREE.MeshStandardMaterial({ color: 0xA0522D }); // Sienna
   const deck = new THREE.Mesh(deckGeometry, deckMaterial);
-  deck.position.y = 2.25;
+  deck.position.y = 4.25;
   shipGroup.add(deck);
-  
+
+  // Bow (front part of the ship)
+  const bowGeometry = new THREE.CylinderGeometry(2, 3, 6, 16, 1, true);
+  const bowMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+  const bow = new THREE.Mesh(bowGeometry, bowMaterial);
+  bow.rotation.z = Math.PI / 2;
+  bow.position.x = -5;
+  bow.position.y = 4;
+  bow.position.z = -12;
+  shipGroup.add(bow);
+
+  // Stern (back part of the ship)
+  const sternGeometry = new THREE.BoxGeometry(4, 6, 6);
+  const sternMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+  const stern = new THREE.Mesh(sternGeometry, sternMaterial);
+  stern.position.x = 5;
+  stern.position.y = 5;
+  stern.position.z = 12;
+  shipGroup.add(stern);
+
   // Main mast
-  const mastGeometry = new THREE.CylinderGeometry(0.3, 0.3, 12, 8);
+  const mastGeometry = new THREE.CylinderGeometry(0.5, 0.5, 24, 16);
   const mastMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
   const mast = new THREE.Mesh(mastGeometry, mastMaterial);
-  mast.position.y = 8;
+  mast.position.y = 16;
   mast.position.z = 0;
   shipGroup.add(mast);
-  
-  // Simple sail
-  const sailGeometry = new THREE.PlaneGeometry(5, 8);
-  const sailMaterial = new THREE.MeshStandardMaterial({ 
+
+  // Crow's nest
+  const nestGeometry = new THREE.CylinderGeometry(2, 2, 1, 16);
+  const nestMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+  const nest = new THREE.Mesh(nestGeometry, nestMaterial);
+  nest.position.y = 24;
+  shipGroup.add(nest);
+
+  // Main sail
+  const mainSailGeometry = new THREE.PlaneGeometry(10, 16);
+  const mainSailMaterial = new THREE.MeshStandardMaterial({ 
     color: 0xf0f0f0,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0.9
   });
-  const sail = new THREE.Mesh(sailGeometry, sailMaterial);
-  sail.rotation.y = Math.PI / 2;
-  sail.position.y = 6;
-  sail.position.z = 0;
-  shipGroup.add(sail);
-  
+  const mainSail = new THREE.Mesh(mainSailGeometry, mainSailMaterial);
+  mainSail.rotation.y = Math.PI / 2;
+  mainSail.position.y = 12;
+  mainSail.position.z = 0;
+  shipGroup.add(mainSail);
+
+  // Fore sail
+  const foreSailGeometry = new THREE.PlaneGeometry(8, 12);
+  const foreSailMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xf0f0f0,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9
+  });
+  const foreSail = new THREE.Mesh(foreSailGeometry, foreSailMaterial);
+  foreSail.rotation.y = Math.PI / 2;
+  foreSail.position.y = 12;
+  foreSail.position.z = -8;
+  shipGroup.add(foreSail);
+
+  // Rear sail
+  const rearSailGeometry = new THREE.PlaneGeometry(8, 12);
+  const rearSailMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xf0f0f0,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9
+  });
+  const rearSail = new THREE.Mesh(rearSailGeometry, rearSailMaterial);
+  rearSail.rotation.y = Math.PI / 2;
+  rearSail.position.y = 12;
+  rearSail.position.z = 8;
+  shipGroup.add(rearSail);
+
+  // Cannons
+  const cannonGeometry = new THREE.CylinderGeometry(0.5, 0.5, 4, 16);
+  const cannonMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 }); // Gray
+  const cannonPositions = [
+    { x: -4, y: 2.5, z: -8 },
+    { x: -4, y: 2.5, z: 8 },
+    { x: 4, y: 2.5, z: -8 },
+    { x: 4, y: 2.5, z: 8 }
+  ];
+
+  cannonPositions.forEach(pos => {
+    const cannon = new THREE.Mesh(cannonGeometry, cannonMaterial);
+    cannon.rotation.z = Math.PI / 2;
+    cannon.position.set(pos.x, pos.y, pos.z);
+    shipGroup.add(cannon);
+  });
+
+  // Ship wheel
+  const wheelGeometry = new THREE.TorusGeometry(1, 0.2, 16, 32);
+  const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown
+  const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+  wheel.position.x = 4;
+  wheel.position.y = 6;
+  wheel.position.z = 10;
+  wheel.rotation.x = Math.PI / 2;
+  shipGroup.add(wheel);
+
   // Position the entire ship on the water
-  shipGroup.position.y = 0.25;
-  
+  shipGroup.position.y = 0.5;
+
   return shipGroup;
 }
 
