@@ -8,7 +8,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 10, 30);
-camera.lookAt(0, 0, 0);
+camera.lookAt(50, 10, 0);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -103,18 +103,16 @@ loader.load('./models/liberty_ship.glb', function(gltf) {
   const size = box.getSize(new THREE.Vector3());
   console.log('Model size before scaling:', size);
   
-  // Apply a much larger scale - 500x larger (10x larger than previous 50x)
-  ship.scale.set(500, 500, 500);
+  // Apply a much larger scale - 500x larger
+  ship.scale.set(1000, 1000, 1000);
   
   // Update the bounding box after scaling
   box.setFromObject(ship);
   const newSize = box.getSize(new THREE.Vector3());
   console.log('Model size after scaling:', newSize);
   
-  // Position the ship to float on the water
-  // The y position should be set so that roughly 1/3 to 1/2 of the ship's height is below water
-  const floatHeight = newSize.y * 0.3; // Put ~30% below water
-  ship.position.set(0, -floatHeight, 0);
+  // Position the ship at the water's surface
+  ship.position.set(0, -7.8, 0);
   
   // Use standard materials that will respond to lighting
   ship.traverse((node) => {
@@ -146,24 +144,51 @@ loader.load('./models/liberty_ship.glb', function(gltf) {
 // Animation loop
 const clock = new THREE.Clock();
 
+// Add movement controls
+const shipSpeed = 0.5; // Speed of ship movement
+const keyStates = {}; // Object to track pressed keys
+
+// Set up keyboard listeners
+window.addEventListener('keydown', (event) => {
+  keyStates[event.code] = true;
+});
+
+window.addEventListener('keyup', (event) => {
+  keyStates[event.code] = false;
+});
+
+// Function to update ship position based on key presses
+function updateShipPosition() {
+  if (!ship) return; // If ship isn't loaded yet, do nothing
+  
+  if (keyStates['ArrowUp'] || keyStates['KeyW']) {
+    ship.position.z -= shipSpeed; // Move forward
+  }
+  if (keyStates['ArrowDown'] || keyStates['KeyS']) {
+    ship.position.z += shipSpeed; // Move backward
+  }
+  if (keyStates['ArrowLeft'] || keyStates['KeyA']) {
+    ship.position.x -= shipSpeed; // Move left
+    // Optional: rotate ship slightly to the left
+    ship.rotation.y = THREE.MathUtils.lerp(ship.rotation.y, Math.PI * 0.1, 0.1);
+  } else if (keyStates['ArrowRight'] || keyStates['KeyD']) {
+    ship.position.x += shipSpeed; // Move right
+    // Optional: rotate ship slightly to the right
+    ship.rotation.y = THREE.MathUtils.lerp(ship.rotation.y, -Math.PI * 0.1, 0.1);
+  } else {
+    // Return rotation to normal when not turning
+    ship.rotation.y = THREE.MathUtils.lerp(ship.rotation.y, 0, 0.1);
+  }
+}
+
 function animate() {
   requestAnimationFrame(animate);
-  
-  const time = clock.getElapsedTime();
   
   // Animate water
   water.material.uniforms['time'].value += 1.0 / 60.0;
   
-  // Animate ship bobbing on the waves - gentler movement for a large ship
-  if (ship) {
-    // Get the current base position (which might be negative to be partly underwater)
-    const baseY = ship.position.y;
-    
-    // Add small wave movement
-    ship.position.y = baseY + Math.sin(time * 0.5) * 0.5;
-    ship.rotation.x = Math.sin(time * 0.4) * 0.01;
-    ship.rotation.z = Math.sin(time * 0.3) * 0.005;
-  }
+  // Update ship position based on key presses
+  updateShipPosition();
   
   renderer.render(scene, camera);
 }
