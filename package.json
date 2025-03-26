@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Three.js project featuring a ship sailing on the sea",
   "main": "index.js",
-  "homepage": "https://yourusername.github.io/threejs-ship-sea",
+  "homepage": "https://alirezasadeqii.github.io/Threejs/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

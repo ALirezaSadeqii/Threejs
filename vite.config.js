@@ -12,5 +12,5 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true
   },
-  base: '/threejs-ship-sea/', // Replace with your repository name
+  base: '/Threejs/', // This should match your repository name
 }); 
