@@ -420,7 +420,7 @@ function updateDayNightCycle() {
 let ship;
 const loader = new GLTFLoader();
 loader.load(
-  "./models/liberty_ship.glb",
+  "/Threejs/models/liberty_ship.glb",
   function (gltf) {
     ship = gltf.scene;
 
