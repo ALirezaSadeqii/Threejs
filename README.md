@@ -1,68 +1,67 @@
-# Three.js Ship at Sea
+# Space Invaders Game
 
-A 3D visualization of a ship sailing on the sea using Three.js.
+A modern implementation of the classic Space Invaders game built with HTML5 Canvas and JavaScript.
 
-## Features
+## 🎮 Demo
 
-- 3D ship model sailing on animated water
-- Dynamic wave animation
-- Ship movement in a circular pattern
-- Orbit controls to navigate the scene
-- Responsive design that adapts to window size
+You can play the game here: [Live Demo](your-github-pages-url)
 
-## Prerequisites
+## 🚀 Features
 
-- Node.js (v14.0.0 or higher recommended)
-- npm or yarn
+- Classic Space Invaders gameplay
+- Player-controlled spaceship
+- Enemy aliens that move and attack
+- Score tracking
+- Sound effects
+- Responsive design
 
-## Installation
+## 🛠️ Installation
 
-1. Clone this repository
-2. Navigate to the project directory
-3. Install dependencies:
-
+1. Clone the repository:
 ```bash
-npm install
-# or
-yarn
+git clone https://github.com/your-username/space-invaders.git
 ```
 
-## Development
-
-To start the development server:
-
+2. Navigate to the project directory:
 ```bash
-npm run dev
-# or
-yarn dev
+cd space-invaders
 ```
 
-Then open your browser and navigate to `http://localhost:5173`
+3. Open the project:
+- If you have VS Code with Live Server extension:
+  - Right-click on `index.html`
+  - Select "Open with Live Server"
+- Alternatively, you can open the `index.html` file directly in your browser
 
-## Controls
+## 🎮 How to Play
 
-- Left-click and drag: Rotate the camera around the scene
-- Right-click and drag: Pan the camera
-- Scroll: Zoom in and out
+- Use `←` and `→` arrow keys to move your ship left and right
+- Press `Space` to shoot
+- Avoid enemy shots
+- Destroy all aliens to win
+- If aliens reach your ship or the bottom of the screen, game over!
 
-## Build for Production
+## 🔧 Technologies Used
 
-To build for production:
+- HTML5 Canvas
+- JavaScript
+- CSS3
 
-```bash
-npm run build
-# or
-yarn build
-```
+## 💡 Common Issues & Solutions
 
-The built files will be in the `dist` directory.
+If the ship or other elements aren't appearing on GitHub Pages:
+1. Check that all asset paths are relative and correct
+2. Ensure all file names match exactly (case-sensitive)
+3. Verify that the repository settings for GitHub Pages are properly configured
 
-## Preview Production Build
+## 🤝 Contributing
 
-To preview the production build:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-```bash
-npm run preview
-# or
-yarn preview
-``` 
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details
